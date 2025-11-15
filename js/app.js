@@ -3,7 +3,7 @@ class RuchengDialectApp {
     constructor() {
         this.data = null;
         this.totalChars = 0;
-        this.dataLoaded = false; // 添加数据加载状态标志
+        this.dataLoaded = false;
         this.init();
     }
 
@@ -11,7 +11,7 @@ class RuchengDialectApp {
         await this.loadData();
         this.setupEventListeners();
         this.updateStats();
-        this.dataLoaded = true; // 设置数据加载完成
+        this.dataLoaded = true;
 
         // 触发数据加载完成事件
         console.log('触发数据加载完成事件');
@@ -111,7 +111,7 @@ class RuchengDialectApp {
     performSearch(character) {
         if (!this.data || !this.dataLoaded) {
             console.error('数据尚未加载完成');
-            this.showError('数据加载中，请稍后重试');
+            // 移除了错误弹窗，静默处理
             return {};
         }
 
@@ -191,10 +191,8 @@ class RuchengDialectApp {
             setTimeout(() => {
                 errorAlert.classList.add('d-none');
             }, 3000);
-        } else {
-            // 在其他页面使用alert
-            alert(message);
         }
+        // 移除了在其他页面使用alert的代码
     }
 
     updateStats() {
