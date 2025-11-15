@@ -8,22 +8,13 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- 导航栏 - 使用浅蓝色渐变 -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container">
-            <a class="navbar-brand" href="index.html">汝邑音韵</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="index.html">首页</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="about.html">关于</a>
-                    </li>
-                </ul>
+            <a class="navbar-brand fw-bold" href="index.html">汝邑音韵</a>
+            <div class="navbar-nav flex-row ms-auto">
+                <a class="nav-link mx-3 active" href="index.html">首页</a>
+                <a class="nav-link mx-3" href="about.html">关于</a>
             </div>
         </div>
     </nav>
@@ -53,6 +44,14 @@
 
             <div id="errorAlert" class="alert alert-danger mt-3 text-center d-none" role="alert">
                 <!-- 错误信息将动态显示 -->
+            </div>
+
+            <!-- 加载提示 -->
+            <div id="loadingAlert" class="alert alert-info mt-3 text-center d-none" role="alert">
+                <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <span id="loadingText">数据加载中，请稍候...</span>
             </div>
         </div>
     </div>
@@ -99,6 +98,8 @@
     <script>
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('首页初始化开始');
+
             // 设置搜索表单提交事件
             document.getElementById('searchForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -111,30 +112,109 @@
                     return;
                 }
 
-                // 跳转到搜索结果页面
-                window.location.href = `results.html?character=${encodeURIComponent(character)}`;
+                // 等待数据加载完成后再跳转
+                waitForDataAndRedirect(character);
             });
 
             // 更新统计信息
             updateStats();
+
+            // 监听数据加载完成事件
+            window.addEventListener('dataLoaded', function() {
+                console.log('首页收到数据加载完成事件');
+                updateStats();
+                hideLoading();
+            });
         });
+
+        function waitForDataAndRedirect(character) {
+            console.log('等待数据加载并跳转:', character);
+
+            if (window.app && window.app.dataLoaded) {
+                // 数据已加载，直接跳转
+                console.log('数据已加载，直接跳转');
+                window.location.href = `results.html?character=${encodeURIComponent(character)}`;
+            } else {
+                // 数据未加载，显示加载提示并等待
+                console.log('数据未加载，显示加载提示');
+                showLoading('数据加载中，请稍候...');
+
+                let waitCount = 0;
+                const maxWait = 50; // 最多等待5秒 (50 * 100ms)
+
+                // 监听数据加载完成事件
+                const dataLoadedHandler = function() {
+                    console.log('收到数据加载事件，准备跳转');
+                    window.removeEventListener('dataLoaded', dataLoadedHandler);
+                    clearInterval(checkInterval);
+                    hideLoading();
+                    window.location.href = `results.html?character=${encodeURIComponent(character)}`;
+                };
+
+                window.addEventListener('dataLoaded', dataLoadedHandler);
+
+                // 定期检查数据状态
+                const checkInterval = setInterval(() => {
+                    waitCount++;
+                    console.log(`检查数据状态，等待次数: ${waitCount}`);
+
+                    if (window.app && window.app.dataLoaded) {
+                        console.log('数据加载完成，准备跳转');
+                        window.removeEventListener('dataLoaded', dataLoadedHandler);
+                        clearInterval(checkInterval);
+                        hideLoading();
+                        window.location.href = `results.html?character=${encodeURIComponent(character)}`;
+                        return;
+                    }
+
+                    if (waitCount >= maxWait) {
+                        // 超时，强制跳转
+                        console.log('等待超时，强制跳转');
+                        window.removeEventListener('dataLoaded', dataLoadedHandler);
+                        clearInterval(checkInterval);
+                        hideLoading();
+                        showError('数据加载超时，请稍后在结果页重试搜索');
+                        window.location.href = `results.html?character=${encodeURIComponent(character)}`;
+                    }
+                }, 100);
+            }
+        }
 
         function showError(message) {
             const errorAlert = document.getElementById('errorAlert');
-            errorAlert.textContent = message;
-            errorAlert.classList.remove('d-none');
+            if (errorAlert) {
+                errorAlert.textContent = message;
+                errorAlert.classList.remove('d-none');
 
-            // 3秒后自动隐藏错误信息
-            setTimeout(() => {
-                errorAlert.classList.add('d-none');
-            }, 3000);
+                setTimeout(() => {
+                    errorAlert.classList.add('d-none');
+                }, 3000);
+            }
+        }
+
+        function showLoading(message) {
+            const loadingAlert = document.getElementById('loadingAlert');
+            const loadingText = document.getElementById('loadingText');
+            if (loadingAlert && loadingText) {
+                loadingText.textContent = message;
+                loadingAlert.classList.remove('d-none');
+            }
+        }
+
+        function hideLoading() {
+            const loadingAlert = document.getElementById('loadingAlert');
+            if (loadingAlert) {
+                loadingAlert.classList.add('d-none');
+            }
         }
 
         function updateStats() {
-            // 从app.js中获取统计信息
             const totalCharsElement = document.getElementById('totalChars');
             if (totalCharsElement && window.app) {
                 totalCharsElement.textContent = window.app.totalChars;
+                console.log('更新统计信息:', window.app.totalChars);
+            } else {
+                console.log('统计信息更新失败: app未初始化或元素不存在');
             }
         }
     </script>
