@@ -3,6 +3,7 @@ class RuchengDialectApp {
     constructor() {
         this.data = null;
         this.totalChars = 0;
+        this.dataLoaded = false; // 添加数据加载状态标志
         this.init();
     }
 
@@ -10,10 +11,21 @@ class RuchengDialectApp {
         await this.loadData();
         this.setupEventListeners();
         this.updateStats();
+        this.dataLoaded = true; // 设置数据加载完成
+
+        // 触发数据加载完成事件
+        console.log('触发数据加载完成事件');
+        window.dispatchEvent(new CustomEvent('dataLoaded', {
+            detail: {
+                totalChars: this.totalChars,
+                dataCount: Object.keys(this.data).length
+            }
+        }));
     }
 
     async loadData() {
         try {
+            console.log('开始加载数据文件...');
             const response = await fetch('data/rucheng_data.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -28,8 +40,13 @@ class RuchengDialectApp {
             console.error('加载数据失败:', error);
             this.data = {};
             this.totalChars = 0;
+            this.dataLoaded = false;
 
-            // 显示错误信息
+            // 触发加载失败事件
+            window.dispatchEvent(new CustomEvent('dataLoadError', {
+                detail: { error: error.message }
+            }));
+
             this.showDataLoadError();
         }
     }
@@ -42,6 +59,7 @@ class RuchengDialectApp {
         } else {
             // 如果没有预定义的元素，创建一个
             const alertDiv = document.createElement('div');
+            alertDiv.id = 'dataLoadError';
             alertDiv.className = 'alert alert-danger alert-dismissible fade show';
             alertDiv.innerHTML = `
                 <strong>数据加载失败!</strong> 无法加载方言数据，请刷新页面重试。
@@ -91,7 +109,7 @@ class RuchengDialectApp {
     }
 
     performSearch(character) {
-        if (!this.data) {
+        if (!this.data || !this.dataLoaded) {
             console.error('数据尚未加载完成');
             this.showError('数据加载中，请稍后重试');
             return {};
@@ -108,8 +126,14 @@ class RuchengDialectApp {
     }
 
     searchCharacters(characters) {
+        if (!this.data || Object.keys(this.data).length === 0) {
+            console.warn('搜索时数据为空');
+            return {};
+        }
+
         const results = {};
         const searchChars = Array.from(characters);
+        console.log('搜索字符:', searchChars);
 
         for (const searchChar of searchChars) {
             // 精确匹配
@@ -129,6 +153,7 @@ class RuchengDialectApp {
             }
         }
 
+        console.log('搜索结果数量:', Object.keys(results).length);
         return results;
     }
 
@@ -190,86 +215,8 @@ class RuchengDialectApp {
     }
 }
 
-// 数据转换功能（如果需要）
-class DataConverter {
-    static async convertExcelToJson() {
-        // 这里可以添加从Excel转换JSON的逻辑
-        // 由于浏览器环境限制，可能需要用户上传文件
-        console.log('数据转换功能需要在服务器端执行');
-    }
-}
-
-// 音频播放管理器
-class AudioManager {
-    constructor() {
-        this.audioPlayer = document.getElementById('audioPlayer') || this.createAudioPlayer();
-    }
-
-    createAudioPlayer() {
-        const audio = document.createElement('audio');
-        audio.id = 'audioPlayer';
-        audio.preload = 'none';
-        document.body.appendChild(audio);
-        return audio;
-    }
-
-    async playAudio(phonetic) {
-        console.log('播放音频:', phonetic);
-
-        try {
-            const audioExists = await window.app.checkAudioExists(phonetic);
-            console.log('音频检查结果:', audioExists);
-
-            if (audioExists.exists) {
-                const audioUrl = `static/audio/${audioExists.filename}`;
-                console.log('音频URL:', audioUrl);
-
-                // 设置音频源并播放
-                this.audioPlayer.src = audioUrl;
-
-                const playPromise = this.audioPlayer.play();
-
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        console.log('音频开始播放');
-                    }).catch(error => {
-                        console.error('播放失败:', error);
-                        this.showPlayError();
-                    });
-                }
-            } else {
-                console.log('音频文件不存在:', phonetic);
-                this.showFileNotFoundError();
-            }
-        } catch (error) {
-            console.error('播放音频时出错:', error);
-            this.showPlayError();
-        }
-    }
-
-    showPlayError() {
-        // 可以在这里添加播放错误的用户反馈
-        console.warn('音频播放失败');
-    }
-
-    showFileNotFoundError() {
-        // 可以在这里添加文件不存在的用户反馈
-        console.warn('音频文件不存在');
-    }
-}
-
 // 初始化应用
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('初始化RuchengDialectApp');
     window.app = new RuchengDialectApp();
-    window.audioManager = new AudioManager();
-
-    // 全局播放音频函数，供HTML中的onclick调用
-    window.playAudio = function(phonetic) {
-        window.audioManager.playAudio(phonetic);
-    };
 });
-
-// 导出供其他模块使用
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { RuchengDialectApp, AudioManager, DataConverter };
-}
