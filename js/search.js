@@ -48,8 +48,7 @@ class SearchResultsManager {
     performSearch(character) {
         if (!window.app || !window.app.data) {
             console.error('数据尚未加载完成');
-            // 移除了错误弹窗，静默处理
-            return;
+            return; // 移除了错误弹窗
         }
 
         const results = window.app.searchCharacters(character);
