@@ -88,7 +88,7 @@ class SearchResultsManager {
             this.noResultsElement.style.display = 'block';
             const noResultsText = document.getElementById('noResultsText');
             if (noResultsText) {
-                noResultsText.textContent = `未找到"${character}"的发音数据`;
+                noResultsText.textContent = `未找到"${character}"的字音数据`;
             }
         }
         if (this.searchInfoElement) {
@@ -256,3 +256,4 @@ function displayResults(character, results) {
         window.searchManager.displayResults(character, results);
     }
 }
+
