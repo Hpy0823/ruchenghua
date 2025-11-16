@@ -56,6 +56,10 @@
                                 <!-- 结果将通过JavaScript动态生成 -->
                             </tbody>
                         </table>
+                        <!-- 音频状态提示 -->
+                        <div id="audioStatus" class="text-center py-2" style="display: none;">
+                            <span id="audioStatusText"></span>
+                        </div>
                     </div>
                 </div>
 
@@ -123,16 +127,82 @@
         font-size: 0.8em;
     }
 
+    /* 音频状态提示样式 */
+    #audioStatus {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .status-loading {
+        color: #0d6efd;
+    }
+
+    .status-missing {
+        color: #dc3545;
+    }
+
     /* 移除表格行的悬停效果 */
     .table-hover tbody tr:hover {
         background-color: transparent;
     }
+
+    /* 加载状态下的音标样式 */
+    .phonetic-loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
     </style>
 
     <script>
+    // 音频播放状态
+    let isAudioLoading = false;
+
+    // 显示音频状态提示
+    function showAudioStatus(message, type) {
+        const audioStatus = document.getElementById('audioStatus');
+        const audioStatusText = document.getElementById('audioStatusText');
+
+        if (audioStatus && audioStatusText) {
+            // 移除之前的样式类
+            audioStatusText.className = '';
+            // 添加新的样式类
+            audioStatusText.classList.add(`status-${type}`);
+
+            // 设置消息内容
+            audioStatusText.innerHTML = message;
+
+            // 显示状态区域
+            audioStatus.style.display = 'block';
+
+            // 淡入效果
+            setTimeout(() => {
+                audioStatus.style.opacity = '1';
+            }, 10);
+        }
+    }
+
+    // 隐藏音频状态提示
+    function hideAudioStatus() {
+        const audioStatus = document.getElementById('audioStatus');
+        if (audioStatus) {
+            // 淡出效果
+            audioStatus.style.opacity = '0';
+            setTimeout(() => {
+                audioStatus.style.display = 'none';
+            }, 300);
+        }
+    }
+
     // 全局播放音频函数
     async function playAudio(phonetic) {
         console.log('点击音标:', phonetic);
+
+        // 如果正在加载，不重复点击
+        if (isAudioLoading) {
+            console.log('音频正在加载中，请稍候...');
+            return;
+        }
 
         try {
             // 检查音频文件是否存在
@@ -140,12 +210,37 @@
             console.log('检查结果:', audioExists);
 
             if (audioExists.exists) {
+                // 有音频文件，显示加载状态
+                isAudioLoading = true;
+                showAudioStatus('<div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">加载中...</span></div>音频加载中...', 'loading');
+
+                // 禁用所有音标点击
+                document.querySelectorAll('.phonetic-clickable').forEach(element => {
+                    element.classList.add('phonetic-loading');
+                });
+
                 const audioPlayer = document.getElementById('audioPlayer');
                 const audioUrl = `static/audio/${audioExists.filename}`;
                 console.log('音频URL:', audioUrl);
 
-                // 设置音频源并播放
+                // 设置音频源
                 audioPlayer.src = audioUrl;
+
+                // 添加事件监听器
+                audioPlayer.oncanplaythrough = function() {
+                    console.log('音频可以播放');
+                };
+
+                audioPlayer.onplaying = function() {
+                    console.log('音频开始播放');
+                    hideAudioStatus();
+                    resetAudioState();
+                };
+
+                audioPlayer.onended = function() {
+                    console.log('音频播放结束');
+                    resetAudioState();
+                };
 
                 // 使用Promise处理播放
                 const playPromise = audioPlayer.play();
@@ -153,19 +248,37 @@
                 if (playPromise !== undefined) {
                     playPromise.then(_ => {
                         console.log('音频开始播放');
+                        // 播放成功，状态在onplaying事件中处理
                     }).catch(error => {
                         console.error('播放失败:', error);
+                        // 静默失败，不显示错误信息
+                        hideAudioStatus();
+                        resetAudioState();
                     });
                 }
 
             } else {
-                // 音频文件不存在，静默失败
+                // 音频文件不存在，直接显示缺失状态
                 console.log('音频文件不存在:', phonetic);
+                showAudioStatus('❌ 音频缺失', 'missing');
+                setTimeout(hideAudioStatus, 2000);
             }
         } catch (error) {
             // 播放出错，静默失败
             console.error('播放音频时出错:', error);
+            hideAudioStatus();
+            resetAudioState();
         }
+    }
+
+    // 重置音频状态
+    function resetAudioState() {
+        isAudioLoading = false;
+
+        // 恢复所有音标点击
+        document.querySelectorAll('.phonetic-clickable').forEach(element => {
+            element.classList.remove('phonetic-loading');
+        });
     }
 
     // 页面加载完成后执行搜索
@@ -175,7 +288,7 @@
         // 从URL参数获取搜索词
         const urlParams = new URLSearchParams(window.location.search);
         const character = urlParams.get('character');
-        
+
         if (character) {
             document.getElementById('characterInput').value = character;
         }
@@ -203,7 +316,7 @@
             console.error('数据尚未加载完成');
             return;
         }
-        
+
         const results = window.app.searchCharacters(character);
         displayResults(character, results);
     }
@@ -220,7 +333,7 @@
 
         // 更新搜索信息
         searchCharacter.textContent = character;
-        
+
         if (Object.keys(results).length === 0) {
             // 无结果
             searchInfo.style.display = 'none';
@@ -240,10 +353,10 @@
             // 生成结果行
             for (const [word, pronunciations] of Object.entries(results)) {
                 const pronunciationsArray = Array.isArray(pronunciations) ? pronunciations : [pronunciations];
-                
+
                 pronunciationsArray.forEach((pron, index) => {
                     const row = document.createElement('tr');
-                    
+
                     // 第一行显示汉字（跨行）
                     if (index === 0) {
                         const charCell = document.createElement('td');
@@ -252,11 +365,11 @@
                         charCell.innerHTML = `<div class="fs-3 fw-bold text-dark text-center">${word}</div>`;
                         row.appendChild(charCell);
                     }
-                    
+
                     // 音标单元格
                     const phoneticCell = document.createElement('td');
                     phoneticCell.className = 'align-middle text-center';
-                    
+
                     if (pron.phonetic) {
                         const phonetics = pron.phonetic.split(',');
                         phoneticCell.innerHTML = phonetics.map((ph, phIndex) => {
@@ -285,13 +398,13 @@
                         phoneticCell.innerHTML = '<span class="text-muted">-</span>';
                     }
                     row.appendChild(phoneticCell);
-                    
+
                     // 注释单元格
                     const notesCell = document.createElement('td');
                     notesCell.className = 'align-middle text-muted text-center';
                     notesCell.textContent = pron.notes ? pron.notes : '-';
                     row.appendChild(notesCell);
-                    
+
                     resultsBody.appendChild(row);
                 });
             }
@@ -300,7 +413,3 @@
     </script>
 </body>
 </html>
-
-
-
-
