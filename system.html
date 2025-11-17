@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音系 - 汝邑音韵</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .phonetic-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 1.5rem;
+        }
+
+        .phonetic-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .phonetic-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .phonetic-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .phonetic-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .phonetic-table td:hover {
+            background-color: #e9ecef;
+        }
+
+        .tone-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tone-table td {
+            width: 33.33%;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .tone-table td:hover {
+            background-color: #e9ecef;
+        }
+
+        .phonetic-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .example-word {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        footer {
+            margin-top: auto;
+        }
+
+        .ipa {
+            font-family: "Arial Unicode MS", sans-serif;
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        /* 调值数字样式 */
+        .tone-value {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-family: "Arial Unicode MS", sans-serif;
+        }
+
+        .tab-content {
+            padding-top: 20px;
+        }
+
+        .nav-tabs {
+            justify-content: center;
+        }
+
+        .nav-tabs .nav-link {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: bold;
+            border-bottom: 3px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">汝邑音韵</a>
+            <div class="navbar-nav flex-row ms-auto">
+                <a class="nav-link mx-3" href="index.html">首页</a>
+                <a class="nav-link mx-3 active" href="system.html">音系</a>
+                <a class="nav-link mx-3" href="about.html">关于</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 内容区域 -->
+    <div class="container my-5">
+        <!-- 选项卡导航 -->
+        <ul class="nav nav-tabs" id="phoneticTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="initials-tab" data-bs-toggle="tab" data-bs-target="#initials" type="button" role="tab" aria-controls="initials" aria-selected="true">声母表</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="finals-tab" data-bs-toggle="tab" data-bs-target="#finals" type="button" role="tab" aria-controls="finals" aria-selected="false">韵母表</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tones-tab" data-bs-toggle="tab" data-bs-target="#tones" type="button" role="tab" aria-controls="tones" aria-selected="false">声调表</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="phoneticTabsContent">
+            <!-- 声母系统 -->
+            <div class="tab-pane fade show active" id="initials" role="tabpanel" aria-labelledby="initials-tab">
+                <div class="card phonetic-card mt-4">
+                    <div class="card-body">
+                        <p>汝城话的声母（包括零声母[∅]在内）共20个。</p>
+
+                        <div class="table-responsive">
+                            <table class="phonetic-table">
+                                <tbody>
+                                    <tr>
+                                        <td onclick="playSound('pu45')"><span class="ipa">p</span><br>婆 [pu45]</td>
+                                        <td onclick="playSound('pʰuəi33')"><span class="ipa">pʰ</span><br>被 [pʰuəi33]</td>
+                                        <td onclick="playSound('mua45')"><span class="ipa">m</span><br>蚊 [mua45]</td>
+                                        <td onclick="playSound('fuɛ21')"><span class="ipa">f</span><br>发 [fuɛ21]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('tiaŋ45')"><span class="ipa">t</span><br>长 [tiaŋ45]</td>
+                                        <td onclick="playSound('tʰuai33')"><span class="ipa">tʰ</span><br>梯 [tʰuai33]</td>
+                                        <td onclick="playSound('nuəŋ44')"><span class="ipa">n</span><br>嫩 [nuəŋ44]</td>
+                                        <td onclick="playSound('lua45')"><span class="ipa">l</span><br>恋 [lua45]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('kɛi33')"><span class="ipa">k</span><br>鸡 [kɛi33]</td>
+                                        <td onclick="playSound('kʰu24')"><span class="ipa">kʰ</span><br>壳 [kʰu24]</td>
+                                        <td onclick="playSound('ŋɛi33')"><span class="ipa">ŋ</span><br>我 [ŋɛi33]</td>
+                                        <td onclick="playSound('xu24')"><span class="ipa">x</span><br>哭 [xu24]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('tɕiəu24')"><span class="ipa">tɕ</span><br>菊 [tɕiəu24]</td>
+                                        <td onclick="playSound('tɕʰia45')"><span class="ipa">tɕʰ</span><br>钱 [tɕʰia45]</td>
+                                        <td onclick="playSound('ȵyɛ33')"><span class="ipa">ȵ</span><br>月 [ȵyɛ33]</td>
+                                        <td onclick="playSound('ɕioŋ21')"><span class="ipa">ɕ</span><br>恐 [ɕioŋ21]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('tso24')"><span class="ipa">ts</span><br>炸 [tso24]</td>
+                                        <td onclick="playSound('tsʰu44')"><span class="ipa">tsʰ</span><br>昨 [tsʰu44]</td>
+                                        <td onclick="playSound('ɛu33')"><span class="ipa">∅</span><br>欧 [ɛu33]</td>
+                                        <td onclick="playSound('sua45')"><span class="ipa">s</span><br>船 [sua45]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 韵母系统 -->
+            <div class="tab-pane fade" id="finals" role="tabpanel" aria-labelledby="finals-tab">
+                <div class="card phonetic-card mt-4">
+                    <div class="card-body">
+                        <p>汝城话的韵母（包括成音节[ŋ]在内）共32个。</p>
+
+                        <div class="table-responsive">
+                            <table class="phonetic-table">
+                                <tbody>
+                                    <tr>
+                                        <td onclick="playSound('sɿ24')"><span class="ipa">ɿ</span><br>去 [sɿ24]</td>
+                                        <td onclick="playSound('tɕʰi44')"><span class="ipa">i</span><br>自 [tɕʰi44]</td>
+                                        <td onclick="playSound('u45')"><span class="ipa">u</span><br>禾 [u45]</td>
+                                        <td onclick="playSound('y33')"><span class="ipa">y</span><br>猪 [y33]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('sa33')"><span class="ipa">a</span><br>三 [sa33]</td>
+                                        <td onclick="playSound('ia˦˨')"><span class="ipa">ia</span><br>宴 [ia24]</td>
+                                        <td onclick="playSound('xua44')"><span class="ipa">ua</span><br>换 [xua44]</td>
+                                        <td onclick="playSound('ɕya21')"><span class="ipa">ya</span><br>选 [ɕya21]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('sɛ33')"><span class="ipa">ɛ</span><br>十 [sɛ33]</td>
+                                        <td onclick="playSound('piɛ21')"><span class="ipa">iɛ</span><br>笔 [piɛ21]</td>
+                                        <td onclick="playSound('xuɛ33')"><span class="ipa">uɛ</span><br>活 [xuɛ33]</td>
+                                        <td onclick="playSound('tɕʰyɛ21')"><span class="ipa">yɛ</span><br>出 [tɕʰyɛ21]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('kau33')"><span class="ipa">au</span><br>交 [kau33]</td>
+                                        <td onclick="playSound('miau24')"><span class="ipa">iau</span><br>猫 [miau24]</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('xɛu33')"><span class="ipa">ɛu</span><br>厚 [xɛu33]</td>
+                                        <td onclick="playSound('iəu24')"><span class="ipa">iəu</span><br>竹 [iəu24]</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('kai33')"><span class="ipa">ai</span><br>街 [kai33]</td>
+                                        <td></td>
+                                        <td onclick="playSound('tuai44')"><span class="ipa">uai</span><br>代 [tuai44]</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('tsʰɛi45')"><span class="ipa">ɛi</span><br>齐 [tsʰɛi45]</td>
+                                        <td></td>
+                                        <td onclick="playSound('muəi24')"><span class="ipa">uəi</span><br>妹 [muəi24]</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('so33')"><span class="ipa">o</span><br>沙 [so33]</td>
+                                        <td onclick="playSound('tɕio24')"><span class="ipa">io</span><br>借 [tɕio24]</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('pʰoŋ33')"><span class="ipa">oŋ</span><br>蜂 [pʰoŋ33]</td>
+                                        <td onclick="playSound('tʰioŋ33')"><span class="ipa">ioŋ</span><br>重 [tʰioŋ33]</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('tsʰaŋ21')"><span class="ipa">aŋ</span><br>窗 [tsʰaŋ21]</td>
+                                        <td onclick="playSound('tɕiaŋ33')"><span class="ipa">iaŋ</span><br>姜 [tɕiaŋ33]</td>
+                                        <td onclick="playSound('uaŋ45')"><span class="ipa">uaŋ</span><br>黄 [uaŋ45]</td>
+                                        <td onclick="playSound('ŋ33')"><span class="ipa">ŋ</span><br>你 [ŋ33]</td>
+                                    </tr>
+                                    <tr>
+                                        <td onclick="playSound('tsɛŋ33')"><span class="ipa">ɛŋ</span><br>针 [tsɛŋ33]</td>
+                                        <td onclick="playSound('iŋ21')"><span class="ipa">iŋ</span><br>饮 [iŋ21]</td>
+                                        <td onclick="playSound('suəŋ44')"><span class="ipa">uəŋ</span><br>顺 [suəŋ44]</td>
+                                        <td onclick="playSound('yŋ45')"><span class="ipa">yŋ</span><br>云 [yŋ45]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                        <!-- 声调系统 -->
+                        <!-- 声调系统 -->
+            <div class="tab-pane fade" id="tones" role="tabpanel" aria-labelledby="tones-tab">
+                <div class="card phonetic-card mt-4">
+                    <div class="card-body">
+                        <p>汝城话的声调共5个。</p>
+
+                        <div class="table-responsive">
+                            <table class="tone-table">
+                                <tbody>
+                                    <tr>
+                                        <td class="playable" onclick="playSound('sɿ33')">阴平</td>
+                                        <td class="playable" onclick="playSound('sɿ33')"><span class="tone-value">33</span></td>
+                                        <td class="playable" onclick="playSound('sɿ33')">诗 <span class="playable" onclick="playSound('sɿ33')">[sɿ33]</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="playable" onclick="playSound('sɿ45')">阳平</td>
+                                        <td class="playable" onclick="playSound('sɿ45')"><span class="tone-value">45</span></td>
+                                        <td class="playable" onclick="playSound('sɿ45')">时 <span class="playable" onclick="playSound('sɿ45')">[sɿ45]</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="playable" onclick="playSound('sɿ21')">上声</td>
+                                        <td class="playable" onclick="playSound('sɿ21')"><span class="tone-value">21</span></td>
+                                        <td class="playable" onclick="playSound('sɿ21')">史 <span class="playable" onclick="playSound('sɿ21')">[sɿ21]</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="playable" onclick="playSound('sɿ24')">阴去</td>
+                                        <td class="playable" onclick="playSound('sɿ24')"><span class="tone-value">24</span></td>
+                                        <td class="playable" onclick="playSound('sɿ24')">试 <span class="playable" onclick="playSound('sɿ24')">[sɿ24]</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="playable" onclick="playSound('sɿ44')">阳去</td>
+                                        <td class="playable" onclick="playSound('sɿ44')"><span class="tone-value">44</span></td>
+                                        <td class="playable" onclick="playSound('sɿ44')">事 <span class="playable" onclick="playSound('sɿ44')">[sɿ44]</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-3 mt-5">
+        <div class="container h-100 d-flex justify-content-center align-items-center">
+            <p class="mb-0">&copy; 2025 汝邑音韵 - 汝城话字音查询器</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 播放音频函数
+        function playSound(soundName) {
+            // 创建音频对象
+            const audio = new Audio(`static/audio/${soundName}.mp3`);
+
+            // 播放音频
+            audio.play().catch(error => {
+                console.log(`无法播放音频: ${soundName}`, error);
+            });
+        }
+    </script>
+</body>
+</html>
