@@ -1217,10 +1217,6 @@
       "notes": "屎"
     },
     {
-      "pronunciation": "xɛi44",
-      "notes": "是"
-    },
-    {
       "pronunciation": "tɕio45",
       "notes": "手笨"
     },
@@ -4292,6 +4288,10 @@
     }
   ],
   "系": [
+    {
+      "pronunciation": "xɛi44",
+      "notes": "是"
+    },
     {
       "pronunciation": "sɿ44",
       "notes": "关~"
@@ -17439,3 +17439,4 @@
   ]
 
 }
+
