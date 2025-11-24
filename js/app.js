@@ -162,7 +162,7 @@ class RuchengDialectApp {
             return { exists: false };
         }
 
-        const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a'];
+        const audioExtensions = ['.m4a'];
 
         for (const ext of audioExtensions) {
             const audioPath = `static/audio/${phonetic}${ext}`;
@@ -218,3 +218,4 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('初始化RuchengDialectApp');
     window.app = new RuchengDialectApp();
 });
+
